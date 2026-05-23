@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindFlow — Behavioral Health Optimization</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="app-header">
+    <div class="logo">mind<span>flow</span></div>
+    <div class="streak-badge"><i class="ti ti-flame"></i> 7-day streak</div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="showTab('today')" role="tab">Today</button>
+    <button class="tab" onclick="showTab('insights')" role="tab">Insights</button>
+    <button class="tab" onclick="showTab('habits')" role="tab">Habits</button>
+    <button class="tab" onclick="showTab('ai')" role="tab">AI Coach</button>
+    <button class="tab" onclick="showTab('profile')" role="tab">Profile</button>
+  </div>
+
+  <!-- TODAY -->
+  <div id="today" class="section active">
+    <div class="card">
+      <div class="greeting" id="greeting-text">Good morning</div>
+      <div class="greeting-sub">How are you feeling right now?</div>
+      <div class="mood-grid">
+        <button class="mood-btn" onclick="selectMood(this,1,'Struggling')" title="Struggling">😔<span class="mood-label">Struggling</span></button>
+        <button class="mood-btn" onclick="selectMood(this,2,'Low')" title="Low">😟<span class="mood-label">Low</span></button>
+        <button class="mood-btn" onclick="selectMood(this,3,'Okay')" title="Okay">😐<span class="mood-label">Okay</span></button>
+        <button class="mood-btn selected" onclick="selectMood(this,4,'Good')" title="Good">🙂<span class="mood-label">Good</span></button>
+        <button class="mood-btn" onclick="selectMood(this,5,'Great')" title="Great">😁<span class="mood-label">Great</span></button>
+      </div>
+      <div class="input-row">
+        <label for="energy-sl">Energy level</label>
+        <input type="range" id="energy-sl" class="sl" min="1" max="10" value="7" step="1" oninput="document.getElementById('energy-out').textContent=this.value;updateScore()">
+        <span class="sl-val" id="energy-out">7</span>
+      </div>
+      <div class="input-row">
+        <label for="stress-sl">Stress level</label>
+        <input type="range" id="stress-sl" class="sl" min="1" max="10" value="4" step="1" oninput="document.getElementById('stress-out').textContent=this.value;updateScore()">
+        <span class="sl-val" id="stress-out">4</span>
+      </div>
+      <div class="input-row">
+        <label for="sleep-sl">Sleep quality</label>
+        <input type="range" id="sleep-sl" class="sl" min="1" max="10" value="6" step="1" oninput="document.getElementById('sleep-out').textContent=this.value;updateScore()">
+        <span class="sl-val" id="sleep-out">6</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Daily wellness checklist</div>
+      <div class="check-grid">
+        <div class="check-item done" onclick="toggleCheck(this)"><span class="ci-icon">🧘</span><span class="ci-text">Morning meditation</span></div>
+        <div class="check-item done" onclick="toggleCheck(this)"><span class="ci-icon">💧</span><span class="ci-text">Hydration goal</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="ci-icon">🚶</span><span class="ci-text">30-min movement</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="ci-icon">📵</span><span class="ci-text">Screen-free hour</span></div>
+        <div class="check-item done" onclick="toggleCheck(this)"><span class="ci-icon">🍏</span><span class="ci-text">Healthy meal</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="ci-icon">✍️</span><span class="ci-text">Journaling</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick reflection</div>
+      <textarea class="journal-area" id="journal-entry" placeholder="What's on your mind today? Any worries, wins, or intentions..."></textarea>
+      <div style="height:10px"></div>
+      <button class="save-btn" onclick="saveEntry()"><i class="ti ti-check"></i> Save today's check-in</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Today's wellbeing score</div>
+      <div style="display:flex;align-items:center;gap:1.5rem">
+        <div class="score-circle">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <circle cx="40" cy="40" r="34" stroke="var(--border)" stroke-width="7"/>
+            <circle id="score-arc" cx="40" cy="40" r="34" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"
+              stroke-dasharray="213.6" stroke-dashoffset="53.4" style="transform:rotate(-90deg);transform-origin:center"/>
+          </svg>
+          <div class="score-num" id="score-display">75</div>
+        </div>
+        <div>
+          <div id="score-label" style="font-size:15px;font-weight:500;color:var(--ink);margin-bottom:4px">Doing well today</div>
+          <div style="font-size:13px;color:var(--ink3);line-height:1.5">Your mood and energy are above your weekly average. Stress is manageable.</div>
+          <div style="margin-top:8px"><span class="alert-pill good"><i class="ti ti-trending-up"></i> +8 vs last week</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div id="insights" class="section">
+    <p class="section-intro">AI-detected patterns from your last 30 days of data.</p>
+
+    <div class="insight-banner purple">
+      <span class="insight-icon">🔍</span>
+      <div>
+        <div class="insight-title">Pattern detected: Sunday anxiety</div>
+        <div class="insight-text">Your stress spikes 40% every Sunday evening. This is likely anticipatory anxiety about the week ahead. Try a "weekly preview" ritual Sunday afternoons.</div>
+      </div>
+    </div>
+
+    <div class="insight-banner green">
+      <span class="insight-icon">💡</span>
+      <div>
+        <div class="insight-title">Morning meditation boosts your day</div>
+        <div class="insight-text">On days you meditate, your average mood score is 4.2 vs 2.9 on days you skip. That's a 45% improvement — your highest-impact habit.</div>
+      </div>
+    </div>
+
+    <div class="insight-banner amber">
+      <span class="insight-icon">⚠️</span>
+      <div>
+        <div class="insight-title">Late-night screen time hurts sleep</div>
+        <div class="insight-text">When you log phone use after 10pm, your sleep quality score drops by 2.1 points on average. 3 such nights in the last week.</div>
+      </div>
+    </div>
+
+    <div class="insight-banner blue">
+      <span class="insight-icon">📈</span>
+      <div>
+        <div class="insight-title">Upward trend over 2 weeks</div>
+        <div class="insight-text">Your overall wellbeing score has risen from 58 to 75 over the last 14 days. Consistency in your morning routine is the likely driver.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">7-day mood history</div>
+      <div id="mood-history">
+        <div class="log-row"><div class="log-dot" style="background:#8b7ff5"></div><div class="log-day">Mon</div><div class="log-bar-wrap"><div class="log-bar" style="width:60%;background:#8b7ff5"></div></div><div class="log-score">3</div><span class="log-tag" style="background:var(--amber-bg);color:var(--amber)">high stress</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#3ab87a"></div><div class="log-day">Tue</div><div class="log-bar-wrap"><div class="log-bar" style="width:80%;background:#3ab87a"></div></div><div class="log-score">4</div><span class="log-tag" style="background:var(--green-bg);color:var(--green)">meditated</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#3ab87a"></div><div class="log-day">Wed</div><div class="log-bar-wrap"><div class="log-bar" style="width:80%;background:#3ab87a"></div></div><div class="log-score">4</div><span class="log-tag" style="background:var(--green-bg);color:var(--green)">exercised</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#8b7ff5"></div><div class="log-day">Thu</div><div class="log-bar-wrap"><div class="log-bar" style="width:60%;background:#8b7ff5"></div></div><div class="log-score">3</div><span class="log-tag" style="background:var(--amber-bg);color:var(--amber)">poor sleep</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#3ab87a"></div><div class="log-day">Fri</div><div class="log-bar-wrap"><div class="log-bar" style="width:100%;background:#3ab87a"></div></div><div class="log-score">5</div><span class="log-tag" style="background:var(--green-bg);color:var(--green)">all habits</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#e05c4f"></div><div class="log-day">Sat</div><div class="log-bar-wrap"><div class="log-bar" style="width:40%;background:#e05c4f"></div></div><div class="log-score">2</div><span class="log-tag" style="background:var(--red-bg);color:var(--red)">low energy</span></div>
+        <div class="log-row"><div class="log-dot" style="background:#3ab87a"></div><div class="log-day">Sun</div><div class="log-bar-wrap"><div class="log-bar" style="width:80%;background:#3ab87a"></div></div><div class="log-score">4</div><span class="log-tag" style="background:var(--green-bg);color:var(--green)">today</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">This week's metrics</div>
+      <div class="metric-row">
+        <div class="metric"><div class="metric-val" style="color:var(--green)">74%</div><div class="metric-lbl">Habit completion</div></div>
+        <div class="metric"><div class="metric-val" style="color:var(--accent)">3.7</div><div class="metric-lbl">Avg mood (1–5)</div></div>
+        <div class="metric"><div class="metric-val" style="color:var(--amber)">5.8</div><div class="metric-lbl">Avg stress (1–10)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HABITS -->
+  <div id="habits" class="section">
+    <p class="section-intro">Your active behavioral interventions. Tap the toggle to mark active for today.</p>
+
+    <div class="card">
+      <div class="card-title">Morning rituals</div>
+      <div class="habit-row">
+        <div class="habit-icon" style="background:var(--purple-bg)">🧘</div>
+        <div class="habit-info">
+          <div class="habit-name">Mindfulness meditation</div>
+          <div class="habit-streak"><i class="ti ti-flame"></i> 7-day streak · 10 min daily</div>
+          <div class="habit-prog"><div class="habit-fill" style="width:70%;background:var(--accent)"></div></div>
+        </div>
+        <button class="toggle-btn on" onclick="toggleHabit(this)" aria-label="Toggle meditation"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="habit-row">
+        <div class="habit-icon" style="background:var(--blue-bg)">📖</div>
+        <div class="habit-info">
+          <div class="habit-name">Morning pages journaling</div>
+          <div class="habit-streak"><i class="ti ti-flame"></i> 3-day streak · 15 min daily</div>
+          <div class="habit-prog"><div class="habit-fill" style="width:43%;background:var(--blue)"></div></div>
+        </div>
+        <button class="toggle-btn off" onclick="toggleHabit(this)" aria-label="Toggle journaling"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="habit-row">
+        <div class="habit-icon" style="background:var(--green-bg)">💧</div>
+        <div class="habit-info">
+          <div class="habit-name">Drink water before coffee</div>
+          <div class="habit-streak"><i class="ti ti-flame"></i> 12-day streak · once daily</div>
+          <div class="habit-prog"><div class="habit-fill" style="width:86%;background:var(--green)"></div></div>
+        </div>
+        <button class="toggle-btn on" onclick="toggleHabit(this)" aria-label="Toggle water habit"><span class="toggle-knob"></span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Evening wind-down</div>
+      <div class="habit-row">
+        <div class="habit-icon" style="background:var(--amber-bg)">📵</div>
+        <div class="habit-info">
+          <div class="habit-name">Phone-free after 10pm</div>
+          <div class="habit-streak">2-day streak · needs improvement</div>
+          <div class="habit-prog"><div class="habit-fill" style="width:29%;background:var(--amber)"></div></div>
+        </div>
+        <button class="toggle-btn off" onclick="toggleHabit(this)" aria-label="Toggle screen time"><span class="toggle-knob"></span></button>
+      </div>
+      <div class="habit-row">
+        <div class="habit-icon" style="background:var(--green-bg)">🌿</div>
+        <div class="habit-info">
+          <div class="habit-name">Gratitude practice</div>
+          <div class="habit-streak"><i class="ti ti-flame"></i> 5-day streak · 3 things daily</div>
+          <div class="habit-prog"><div class="habit-fill" style="width:71%;background:var(--green)"></div></div>
+        </div>
+        <button class="toggle-btn on" onclick="toggleHabit(this)" aria-label="Toggle gratitude"><span class="toggle-knob"></span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AI-recommended intervention</div>
+      <div class="insight-banner amber" style="margin-bottom:0">
+        <span class="insight-icon">🎯</span>
+        <div>
+          <div class="insight-title">New habit suggestion</div>
+          <div class="insight-text">Based on your Sunday stress pattern, a "weekly intention-setting" habit on Sunday at 4pm could reduce anticipatory anxiety by up to 35%. Want to add it?</div>
+          <button class="add-habit-btn" onclick="addHabit()">Add this habit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI COACH -->
+  <div id="ai" class="section">
+    <p class="section-intro">Your personal AI wellbeing coach. Ask about patterns, get personalized strategies, or explore coping techniques.</p>
+
+    <div class="card" style="padding:1rem">
+      <div id="ai-chat-box">
+        <div class="ai-msg">Hi! I'm your MindFlow AI coach. I've analyzed your recent patterns and I'm here to help you build sustainable mental wellness. What would you like to explore today?</div>
+      </div>
+    </div>
+
+    <div class="ai-prompt-grid">
+      <button class="ai-prompt-btn" onclick="askAI('Why do I feel anxious on Sundays?')">Why am I anxious on Sundays? ↗</button>
+      <button class="ai-prompt-btn" onclick="askAI('What habits are helping me the most?')">What habits help me most? ↗</button>
+      <button class="ai-prompt-btn" onclick="askAI('Give me a breathing exercise for stress')">Give me a breathing exercise ↗</button>
+      <button class="ai-prompt-btn" onclick="askAI('How can I improve my sleep quality?')">Improve my sleep quality ↗</button>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:0.5rem">
+      <input type="text" id="ai-input" placeholder="Ask your AI coach..." style="flex:1" onkeydown="if(event.key==='Enter')sendAIMsg()" aria-label="Message input">
+      <button id="send-btn" onclick="sendAIMsg()" class="send-btn" aria-label="Send"><i class="ti ti-send"></i></button>
+    </div>
+
+    <p class="api-note">⚙️ To enable the AI Coach, add your Gemini API key in <code>js/app.js</code> (search for <code>GEMINI_API_KEY</code>). Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>.</p>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="profile" class="section">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem">
+        <div class="avatar">🧠</div>
+        <div>
+          <div style="font-size:16px;font-weight:500;color:var(--ink)">Alex Chen</div>
+          <div style="font-size:13px;color:var(--ink3)">Member since Jan 2025 · 30-day check-in streak</div>
+        </div>
+      </div>
+      <div class="card-title">Wellbeing profile</div>
+      <div class="profile-field"><span class="pf-label">Primary goal</span><span class="pf-value">Reduce anxiety</span><span class="pf-edit">edit</span></div>
+      <div class="profile-field"><span class="pf-label">Stressors</span><span class="pf-value">Work, sleep</span><span class="pf-edit">edit</span></div>
+      <div class="profile-field"><span class="pf-label">Preferred check-in</span><span class="pf-value">Morning (8am)</span><span class="pf-edit">edit</span></div>
+      <div class="profile-field"><span class="pf-label">Notification style</span><span class="pf-value">Gentle nudges</span><span class="pf-edit">edit</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">All-time stats</div>
+      <div class="metric-row">
+        <div class="metric"><div class="metric-val" style="color:var(--accent)">142</div><div class="metric-lbl">Check-ins logged</div></div>
+        <div class="metric"><div class="metric-val" style="color:var(--green)">68%</div><div class="metric-lbl">Habit adherence</div></div>
+        <div class="metric"><div class="metric-val" style="color:var(--amber)">+17</div><div class="metric-lbl">Score improvement</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Behavioral intelligence summary</div>
+      <div class="insight-banner green" style="margin-bottom:8px">
+        <span class="insight-icon">⭐</span>
+        <div><div class="insight-title">Top strength: consistency</div><div class="insight-text">You complete morning habits 83% of the time — top 15% of users.</div></div>
+      </div>
+      <div class="insight-banner amber" style="margin-bottom:0">
+        <span class="insight-icon">🎯</span>
+        <div><div class="insight-title">Growth area: evening routine</div><div class="insight-text">Evening habit completion is 41%. Bridging this gap could unlock your next wellbeing level.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
+<script src="js/app.js"></script>
+</body>
+</html>
